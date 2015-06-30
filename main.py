@@ -1,36 +1,44 @@
 __author__ = 'qqibrow'
 import re
+from pprint import pprint
 
-pid2cwd = {};
-includesList = [];
-
-def doAnalysis(f):
+def getPid2CmdTable(f):
+    pid2cwd = {};
     for line in f:
-        # add pwd to pid -> pwd table.
         pid = re.search("^\d+", line);
         cwd = re.search("getcwd\(\"(.*?)\"", line);
         if pid and cwd:
             pid2cwd[pid.group(0)] = cwd.group(1);
+    return pid2cwd;
 
+# return [(pid, [include])]
+def getPidWithIncludeList(f):
+    includesList = [];
+    for line in f:
         includes = re.findall(r"(-I.*?)\"\,", line);
         if(includes):
             pid = re.search("^\d+", line).group(0);
             includesList.append((pid, includes));
+    return includesList;
+
+
+def Init(filename):
+    with open(filename, 'r') as f:
+        pid2cmd = getPid2CmdTable(f);
+    with open(filename, 'r') as f:
+        pidIncludeList = getPidWithIncludeList(f);
+    return pid2cmd, pidIncludeList;
 
 filename = './test';
-with open(filename, 'r') as f:
-    doAnalysis(f);
 
-
+pid2cmd, pidIncludeList = Init(filename);
 regex = re.compile("^-I\.\.");
-finalList = [];
-for pid,includes in includesList:
-    if pid in pid2cwd:
-        cwd = pid2cwd[pid];
+includesWithAbsPath = set();
+for pid,includes in pidIncludeList:
+    if pid in pid2cmd:
+        cwd = pid2cmd[pid];
         for include in includes:
-            finalList.append(regex.sub("-I" + cwd + "/..", include));
+            includesWithAbsPath.add(regex.sub("-I" + cwd + "/..", include));
 
-
-myset = set(finalList);
-for i in myset:
-    print i;
+for include in includesWithAbsPath:
+    print include;
