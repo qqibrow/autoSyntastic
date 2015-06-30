@@ -1,3 +1,5 @@
+#!/usr/bin/python
+
 __author__ = 'qqibrow'
 import re
 import sys
@@ -23,15 +25,13 @@ def getPidWithIncludeList(lines):
     return includesList;
 
 
-def Init(filename):
+def Init():
     lines = sys.stdin.readlines();
     pid2cmd = getPid2CmdTable(lines);
     pidIncludeList = getPidWithIncludeList(lines);
     return pid2cmd, pidIncludeList;
 
-filename = './test';
-
-pid2cmd, pidIncludeList = Init(filename);
+pid2cmd, pidIncludeList = Init();
 regex = re.compile("^-I\.\.");
 includesWithAbsPath = set();
 for pid,includes in pidIncludeList:
