@@ -1,10 +1,11 @@
 __author__ = 'qqibrow'
 import re
+import sys
 from pprint import pprint
 
-def getPid2CmdTable(f):
+def getPid2CmdTable(lines):
     pid2cwd = {};
-    for line in f:
+    for line in lines:
         pid = re.search("^\d+", line);
         cwd = re.search("getcwd\(\"(.*?)\"", line);
         if pid and cwd:
@@ -12,9 +13,9 @@ def getPid2CmdTable(f):
     return pid2cwd;
 
 # return [(pid, [include])]
-def getPidWithIncludeList(f):
+def getPidWithIncludeList(lines):
     includesList = [];
-    for line in f:
+    for line in lines:
         includes = re.findall(r"(-I.*?)\"\,", line);
         if(includes):
             pid = re.search("^\d+", line).group(0);
@@ -23,10 +24,9 @@ def getPidWithIncludeList(f):
 
 
 def Init(filename):
-    with open(filename, 'r') as f:
-        pid2cmd = getPid2CmdTable(f);
-    with open(filename, 'r') as f:
-        pidIncludeList = getPidWithIncludeList(f);
+    lines = sys.stdin.readlines();
+    pid2cmd = getPid2CmdTable(lines);
+    pidIncludeList = getPidWithIncludeList(lines);
     return pid2cmd, pidIncludeList;
 
 filename = './test';
