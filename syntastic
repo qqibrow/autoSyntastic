@@ -1,0 +1,12 @@
+#!/usr/local/bin/perl -w
+
+use strict;
+use warnings;
+
+my $execCmd = join(' ', @ARGV);
+print "$execCmd\n";
+my $traceOutput = `strace -eexecve,getcwd -s 200 -o traceresult -f $execCmd`;
+print "traceOutput: $traceOutput\n";
+my $includes = `cat traceresult | /home/lniu/autoSyntastic/main.py > .syntastic_cpp_config`;
+#print "all the includes:\n $includes\n";
+
